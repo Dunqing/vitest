@@ -11,7 +11,7 @@ export class VerboseReporter extends DefaultReporter {
     this.rendererOptions.renderSucceed = true
   }
 
-  onTaskUpdate(packs: TaskResultPack[]) {
+  async onTaskUpdate(packs: TaskResultPack[]) {
     if (this.isTTY)
       return
     for (const pack of packs) {

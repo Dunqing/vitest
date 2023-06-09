@@ -14,22 +14,23 @@ export class Logger {
   logUpdate = createLogUpdate(process.stdout)
 
   private _clearScreenPending: string | undefined
+  _log = process.stdout.write.bind(process.stdout)
+  _error = process.stderr.write.bind(process.stderr)
 
   constructor(
     public ctx: Vitest,
     public console = globalThis.console,
   ) {
-
   }
 
   log(...args: any[]) {
     this._clearScreen()
-    this.console.log(...args)
+    this._log(`${args.join('\n')}\n`)
   }
 
   error(...args: any[]) {
     this._clearScreen()
-    this.console.error(...args)
+    this._error(`${args.join('\n')}\n`)
   }
 
   warn(...args: any[]) {
@@ -136,9 +137,9 @@ export class Logger {
     ))
     this.log(c.red(divider(c.bold(c.inverse(' Unhandled Errors ')))))
     this.log(errorMessage)
-    await Promise.all(errors.map(async (err) => {
-      await this.printError(err, true, (err as ErrorWithDiff).type || 'Unhandled Error')
-    }))
+    errors.forEach(async (err) => {
+      this.printError(err, true, (err as ErrorWithDiff).type || 'Unhandled Error')
+    })
     this.log(c.red(divider()))
   }
 

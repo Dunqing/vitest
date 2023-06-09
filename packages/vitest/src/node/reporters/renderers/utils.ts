@@ -213,3 +213,75 @@ export function formatProjectName(name: string | undefined, suffix = ' ') {
   ]
   return colors[index % colors.length](`|${name}|`) + suffix
 }
+
+/**
+ * Copy from https://github.com/jestjs/jest/blob/main/packages/jest-reporters/src/wrapAnsiString.ts
+ */
+// word-wrap a string that contains ANSI escape sequences.
+// ANSI escape sequences do not add to the string length.
+export default function wrapAnsiString(
+  string: string,
+  terminalWidth: number,
+): string {
+  if (terminalWidth === 0) {
+    // if the terminal width is zero, don't bother word-wrapping
+    return string
+  }
+
+  // eslint-disable-next-line no-control-regex
+  const ANSI_REGEXP = /[\u001B\u009B]\[\d{1,2}m/gu
+  const tokens = []
+  let lastIndex = 0
+  let match
+
+  // eslint-disable-next-line no-cond-assign
+  while ((match = ANSI_REGEXP.exec(string))) {
+    const ansi = match[0]
+    const index = match.index
+    if (index !== lastIndex)
+      tokens.push(['string', string.slice(lastIndex, index)])
+
+    tokens.push(['ansi', ansi])
+    lastIndex = index + ansi.length
+  }
+
+  if (lastIndex !== string.length - 1)
+    tokens.push(['string', string.slice(lastIndex, string.length)])
+
+  let lastLineLength = 0
+
+  return tokens
+    .reduce(
+      (lines, [kind, token]) => {
+        if (kind === 'string') {
+          if (lastLineLength + token.length > terminalWidth) {
+            while (token.length) {
+              const chunk = token.slice(0, terminalWidth - lastLineLength)
+              const remaining = token.slice(
+                terminalWidth - lastLineLength,
+                token.length,
+              )
+              lines[lines.length - 1] += chunk
+              lastLineLength += chunk.length
+              token = remaining
+              if (token.length) {
+                lines.push('')
+                lastLineLength = 0
+              }
+            }
+          }
+          else {
+            lines[lines.length - 1] += token
+            lastLineLength += token.length
+          }
+        }
+        else {
+          lines[lines.length - 1] += token
+        }
+
+        return lines
+      },
+      [''],
+    )
+    .join('\n')
+}

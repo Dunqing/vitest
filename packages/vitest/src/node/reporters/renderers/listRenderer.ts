@@ -177,7 +177,6 @@ export function renderTree(tasks: Task[], options: ListRendererOptions, level = 
 
 export function createListRenderer(_tasks: Task[], options: ListRendererOptions) {
   let tasks = _tasks
-  let timer: any
 
   const log = options.logger.logUpdate
 
@@ -206,21 +205,14 @@ export function createListRenderer(_tasks: Task[], options: ListRendererOptions)
   }
 
   return {
-    start() {
-      if (timer)
-        return this
-      timer = setInterval(update, 16)
-      return this
+    print() {
+      update()
     },
     update(_tasks: Task[]) {
       tasks = _tasks
       return this
     },
     async stop() {
-      if (timer) {
-        clearInterval(timer)
-        timer = undefined
-      }
       log.clear()
       if (options.logger.ctx.config.hideSkippedTests) {
         const filteredTasks = tasks.filter(t => t.mode !== 'skip' && t.mode !== 'todo')

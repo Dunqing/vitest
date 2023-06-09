@@ -40,4 +40,8 @@ describe('expect.soft', () => {
     expect.soft('test2').toBe('test res')
     expect.soft('test3').toBe('test res')
   })
+
+  test('snap', () => {
+    expect(25).toMatchInlineSnapshot('25')
+  })
 })

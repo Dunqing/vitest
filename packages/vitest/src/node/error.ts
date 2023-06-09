@@ -19,7 +19,7 @@ interface PrintErrorOptions {
   showCodeFrame?: boolean
 }
 
-export async function printError(error: unknown, ctx: Vitest, options: PrintErrorOptions = {}) {
+export function printError(error: unknown, ctx: Vitest, options: PrintErrorOptions = {}) {
   const { showCodeFrame = true, fullStack = false, type } = options
   let e = error as ErrorWithDiff
 
@@ -93,7 +93,7 @@ export async function printError(error: unknown, ctx: Vitest, options: PrintErro
 
   if (typeof e.cause === 'object' && e.cause && 'name' in e.cause) {
     (e.cause as any).name = `Caused by: ${(e.cause as any).name}`
-    await printError(e.cause, ctx, { fullStack, showCodeFrame: false })
+    printError(e.cause, ctx, { fullStack, showCodeFrame: false })
   }
 
   handleImportOutsideModuleError(e.stack || e.stackStr || '', ctx)

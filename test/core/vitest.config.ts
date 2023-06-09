@@ -40,6 +40,7 @@ export default defineConfig({
     ],
   },
   test: {
+    reporters: 'default',
     name: 'core',
     exclude: ['**/fixtures/**', ...defaultExclude],
     slowTestThreshold: 1000,
