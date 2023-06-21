@@ -177,7 +177,6 @@ export function renderTree(tasks: Task[], options: ListRendererOptions, level = 
 
 export function createListRenderer(_tasks: Task[], options: ListRendererOptions) {
   let tasks = _tasks
-  let timer: any
 
   const log = options.logger.logUpdate
 
@@ -206,31 +205,19 @@ export function createListRenderer(_tasks: Task[], options: ListRendererOptions)
   }
 
   return {
-    start() {
-      if (timer)
-        return this
-      timer = setInterval(update, 16)
-      return this
-    },
-    update(_tasks: Task[]) {
-      tasks = _tasks
-      return this
-    },
-    async stop() {
-      if (timer) {
-        clearInterval(timer)
-        timer = undefined
-      }
+    update,
+    async print() {
       log.clear()
-      if (options.logger.ctx.config.hideSkippedTests) {
-        const filteredTasks = tasks.filter(t => t.mode !== 'skip' && t.mode !== 'todo')
-        // Note that at this point the renderTree should output all tasks
-        options.logger.log(renderTree(filteredTasks, options))
-      }
-      else {
-        // Note that at this point the renderTree should output all tasks
-        options.logger.log(renderTree(tasks, options))
-      }
+      let filteredTasks = tasks
+      if (options.logger.ctx.config.hideSkippedTests)
+        filteredTasks = tasks.filter(t => t.mode !== 'skip' && t.mode !== 'todo')
+
+      options.logger.log(renderTree(filteredTasks, options))
+      return this
+    },
+    updateFiles(_tasks: Task[]) {
+      tasks = _tasks
+      update()
       return this
     },
     clear() {
